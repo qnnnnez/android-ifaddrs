@@ -164,7 +164,7 @@ static struct nlmsghdr *getNetlinkResponse(int p_socket, int *p_size, int *p_don
                     return NULL;
                 }
             }
-            return l_buffer;
+            return (struct nlmsghdr*)l_buffer;
         }
         
         l_size *= 2;
@@ -173,7 +173,7 @@ static struct nlmsghdr *getNetlinkResponse(int p_socket, int *p_size, int *p_don
 
 static NetlinkList *newListItem(struct nlmsghdr *p_data, unsigned int p_size)
 {
-    NetlinkList *l_item = malloc(sizeof(NetlinkList));
+    NetlinkList *l_item = (NetlinkList*)malloc(sizeof(NetlinkList));
     if (l_item == NULL)
     {
         return NULL;
@@ -325,13 +325,13 @@ static int interpretLink(struct nlmsghdr *p_hdr, struct ifaddrs **p_resultList)
         }
     }
     
-    struct ifaddrs *l_entry = malloc(sizeof(struct ifaddrs) + sizeof(int) + l_nameSize + l_addrSize + l_dataSize);
+    struct ifaddrs *l_entry = (struct ifaddrs*)malloc(sizeof(struct ifaddrs) + sizeof(int) + l_nameSize + l_addrSize + l_dataSize);
     if (l_entry == NULL)
     {
         return -1;
     }
     memset(l_entry, 0, sizeof(struct ifaddrs));
-    l_entry->ifa_name = "";
+    l_entry->ifa_name = (char*)"";
     
     char *l_index = ((char *)l_entry) + sizeof(struct ifaddrs);
     char *l_name = l_index + sizeof(int);
@@ -369,7 +369,7 @@ static int interpretLink(struct nlmsghdr *p_hdr, struct ifaddrs **p_resultList)
                 break;
             }
             case IFLA_IFNAME:
-                strncpy(l_name, l_rtaData, l_rtaDataSize);
+                strncpy(l_name, (char*)l_rtaData, l_rtaDataSize);
                 l_name[l_rtaDataSize] = '\0';
                 l_entry->ifa_name = l_name;
                 break;
@@ -448,13 +448,13 @@ static int interpretAddr(struct nlmsghdr *p_hdr, struct ifaddrs **p_resultList, 
         }
     }
     
-    struct ifaddrs *l_entry = malloc(sizeof(struct ifaddrs) + l_nameSize + l_addrSize);
+    struct ifaddrs *l_entry = (struct ifaddrs*)malloc(sizeof(struct ifaddrs) + l_nameSize + l_addrSize);
     if (l_entry == NULL)
     {
         return -1;
     }
     memset(l_entry, 0, sizeof(struct ifaddrs));
-    l_entry->ifa_name = (l_interface ? l_interface->ifa_name : "");
+    l_entry->ifa_name = (l_interface ? l_interface->ifa_name : (char*)"");
     
     char *l_name = ((char *)l_entry) + sizeof(struct ifaddrs);
     char *l_addr = l_name + l_nameSize;
@@ -513,7 +513,7 @@ static int interpretAddr(struct nlmsghdr *p_hdr, struct ifaddrs **p_resultList, 
                 break;
             }
             case IFA_LABEL:
-                strncpy(l_name, l_rtaData, l_rtaDataSize);
+                strncpy(l_name, (char*)l_rtaData, l_rtaDataSize);
                 l_name[l_rtaDataSize] = '\0';
                 l_entry->ifa_name = l_name;
                 break;
